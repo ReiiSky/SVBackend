@@ -47,7 +47,7 @@ func (dc databaseConnection) Ping(ctx context.Context) error {
 }
 
 func (dc databaseConnection) RunQuery(ctx context.Context, result any, query string, args ...any) error {
-	return dc.db.SelectContext(ctx, result, query, args)
+	return dc.db.SelectContext(ctx, result, query, args...)
 }
 
 func (dc databaseConnection) RunCommand(ctx context.Context, operationFn func(*sqlx.Tx) error) error {

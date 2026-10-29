@@ -54,8 +54,10 @@ func setupArticleRepository() packages.ArticleRepository {
 
 func setupController(k backend.Kernel) {
 	createArticleController := application.NewCreateArticleController(k)
+	getArticleController := application.NewGetArticleController(k)
 
 	k.RegisterHandlerFn(func(e *gin.Engine) {
 		e.POST("/article", createArticleController.Handle)
+		e.GET("/article", getArticleController.Handle)
 	})
 }
