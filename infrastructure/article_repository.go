@@ -74,3 +74,26 @@ func (ar articleRepository) CreateArticle(ctx context.Context, article domain.Ar
 		return nil
 	})
 }
+
+func (ar articleRepository) UpdateArticle(ctx context.Context, id int, article domain.Article) error {
+	return ar.connection.RunCommand(ctx, func(tx *sqlx.Tx) error {
+		dml, args := sqlbuilder.MySQL.NewUpdateBuilder().
+			Update("posts").
+			Set(
+				fmt.Sprintf("title='%s'", article.Title),
+				fmt.Sprintf("content='%s'", article.Content),
+				fmt.Sprintf("category='%s'", article.Category),
+				fmt.Sprintf("status='%s'", article.Status),
+			).
+			Where(fmt.Sprintf("id = %d", id)).
+			Build()
+
+		_, err := tx.ExecContext(ctx, dml, args...)
+
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+}

@@ -56,10 +56,12 @@ func setupController(k backend.Kernel) {
 	createArticleController := application.NewCreateArticleController(k)
 	getArticleController := application.NewGetArticleController(k)
 	getDetailArticleController := application.NewGetDetailArticleController(k)
+	updateArticleController := application.NewUpdateArticleController(k)
 
 	k.RegisterHandlerFn(func(e *gin.Engine) {
 		e.POST("/article", createArticleController.Handle)
 		e.GET("/article", getArticleController.Handle)
 		e.GET("/article/:id", getDetailArticleController.Handle)
+		e.PUT("/article/:id", updateArticleController.Handle)
 	})
 }
