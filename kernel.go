@@ -5,37 +5,61 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/ReiiSky/SharingVisionBackend/packages"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
-type KernelParams struct {
-	Port int
+const (
+	MIN_PORT     = 1024
+	DEFAULT_PORT = 3000
+)
+
+type KernelProps struct {
+	Port              int
+	ArticleRepository packages.ArticleRepository
+	Validate          *validator.Validate
 }
 
-type kernel struct {
-	params    KernelParams
-	ginEngine *gin.Engine
+type Kernel struct {
+	props  KernelProps
+	engine *gin.Engine
 }
 
-func NewKernel(params KernelParams) kernel {
-	return kernel{
-		params,
+func NewKernel(props KernelProps) Kernel {
+	return Kernel{
+		props,
 		gin.Default(),
 	}
 }
 
-func (k kernel) RunServer() {
-	if k.ginEngine == nil {
+func (k Kernel) RegisterHandlerFn(fn func(*gin.Engine)) {
+	fn(k.engine)
+}
+
+func (k Kernel) Validator() *validator.Validate {
+	return k.props.Validate
+}
+
+func (k Kernel) ArticleRepository() packages.ArticleRepository {
+	return k.props.ArticleRepository
+}
+
+func (k Kernel) RunServer() {
+	if k.engine == nil {
 		panic(errors.New("gin Engine is not initialized"))
 	}
 
-	activePort := k.params.Port
+	activePort := k.props.Port
 
-	if activePort <= 1024 {
-		activePort = 3000
+	if activePort <= MIN_PORT {
+		activePort = DEFAULT_PORT
 	}
 
 	address := fmt.Sprintf("0.0.0.0:%d", activePort)
 	log.Printf("Starting server at: %s\n", address)
-	k.ginEngine.Run(address)
+
+	if err := k.engine.Run(address); err != nil {
+		log.Fatalf("engine stopped with error: %s", err.Error())
+	}
 }
