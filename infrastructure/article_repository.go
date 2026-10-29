@@ -22,6 +22,7 @@ func (ar articleRepository) GetLatestArticles(ctx context.Context, opts QueryOpt
 		NewSelectBuilder().
 		From("posts").
 		Select("id", "title", "content", "category", "status").
+		Where("deleted_at is null").
 		OrderByDesc("id").
 		Offset(opts.offset).
 		Limit(opts.limit).
@@ -41,7 +42,7 @@ func (ar articleRepository) GetArticleByID(ctx context.Context, id int) (*domain
 		NewSelectBuilder().
 		From("posts").
 		Select("id", "title", "content", "category", "status").
-		Where(fmt.Sprintf("id = %d", id)).
+		Where(fmt.Sprintf("id = %d and deleted_at is null", id)).
 		Build()
 
 	articles := []domain.Article{}
@@ -84,6 +85,26 @@ func (ar articleRepository) UpdateArticle(ctx context.Context, id int, article d
 				fmt.Sprintf("content='%s'", article.Content),
 				fmt.Sprintf("category='%s'", article.Category),
 				fmt.Sprintf("status='%s'", article.Status),
+			).
+			Where(fmt.Sprintf("id = %d", id)).
+			Build()
+
+		_, err := tx.ExecContext(ctx, dml, args...)
+
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+}
+
+func (ar articleRepository) DeleteArticle(ctx context.Context, id int) error {
+	return ar.connection.RunCommand(ctx, func(tx *sqlx.Tx) error {
+		dml, args := sqlbuilder.MySQL.NewUpdateBuilder().
+			Update("posts").
+			Set(
+				"deleted_at=now()",
 			).
 			Where(fmt.Sprintf("id = %d", id)).
 			Build()

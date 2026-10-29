@@ -12,4 +12,5 @@ type ArticleRepository interface {
 	GetLatestArticles(context.Context, infrastructure.QueryOptions) ([]domain.Article, error)
 	CreateArticle(context.Context, domain.Article) error
 	UpdateArticle(context.Context, int, domain.Article) error
+	DeleteArticle(context.Context, int) error
 }
