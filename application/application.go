@@ -1,6 +1,8 @@
 package application
 
 import (
+	"fmt"
+
 	"github.com/ReiiSky/SharingVisionBackend/packages"
 	"github.com/go-playground/validator/v10"
 )
@@ -36,6 +38,14 @@ func NewInvalidBodyValueResponse(message string) Response[any] {
 	return Response[any]{
 		Status:  "failed",
 		Message: message,
+		Data:    nil,
+	}
+}
+
+func NewNotFoundResponse(dataname string) Response[any] {
+	return Response[any]{
+		Status:  "failed",
+		Message: fmt.Sprintf("%s not found", dataname),
 		Data:    nil,
 	}
 }

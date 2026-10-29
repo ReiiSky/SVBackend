@@ -8,6 +8,7 @@ import (
 )
 
 type ArticleRepository interface {
+	GetArticleByID(context.Context, int) (*domain.Article, error)
 	GetLatestArticles(context.Context, infrastructure.QueryOptions) ([]domain.Article, error)
 	CreateArticle(context.Context, domain.Article) error
 }

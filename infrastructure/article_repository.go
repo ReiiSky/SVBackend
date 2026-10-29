@@ -2,6 +2,7 @@ package infrastructure
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/ReiiSky/SharingVisionBackend/domain"
 	"github.com/huandu/go-sqlbuilder"
@@ -33,6 +34,27 @@ func (ar articleRepository) GetLatestArticles(ctx context.Context, opts QueryOpt
 	}
 
 	return articles, nil
+}
+
+func (ar articleRepository) GetArticleByID(ctx context.Context, id int) (*domain.Article, error) {
+	query, args := sqlbuilder.MySQL.
+		NewSelectBuilder().
+		From("posts").
+		Select("id", "title", "content", "category", "status").
+		Where(fmt.Sprintf("id = %d", id)).
+		Build()
+
+	articles := []domain.Article{}
+
+	if err := ar.connection.RunQuery(ctx, &articles, query, args...); err != nil {
+		return nil, err
+	}
+
+	if len(articles) <= 0 {
+		return nil, nil
+	}
+
+	return &articles[0], nil
 }
 
 func (ar articleRepository) CreateArticle(ctx context.Context, article domain.Article) error {
