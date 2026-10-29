@@ -33,5 +33,5 @@ func (ctrl getArticleController) Handle(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, NewSuccessResponse("article created", articles))
+	c.JSON(http.StatusOK, NewSuccessResponse("article retrieved", articles))
 }
