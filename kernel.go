@@ -28,9 +28,12 @@ type Kernel struct {
 }
 
 func NewKernel(props KernelProps) Kernel {
+	engine := gin.Default()
+	engine.Use(cors.Default())
+
 	return Kernel{
 		props,
-		gin.Default(),
+		engine,
 	}
 }
 
@@ -51,7 +54,6 @@ func (k Kernel) RunServer() {
 		panic(errors.New("gin Engine is not initialized"))
 	}
 
-	k.engine.Use(cors.Default())
 	activePort := k.props.Port
 
 	if activePort <= MIN_PORT {
