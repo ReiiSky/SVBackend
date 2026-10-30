@@ -78,18 +78,18 @@ func (ar articleRepository) CreateArticle(ctx context.Context, article domain.Ar
 
 func (ar articleRepository) UpdateArticle(ctx context.Context, id int, article domain.Article) error {
 	return ar.connection.RunCommand(ctx, func(tx *sqlx.Tx) error {
-		dml, args := sqlbuilder.MySQL.NewUpdateBuilder().
+		dml, _ := sqlbuilder.MySQL.NewUpdateBuilder().
 			Update("posts").
 			Set(
-				fmt.Sprintf("title='%s'", article.Title),
-				fmt.Sprintf("content='%s'", article.Content),
-				fmt.Sprintf("category='%s'", article.Category),
-				fmt.Sprintf("status='%s'", article.Status),
+				"title=?",
+				"content=?",
+				"category=?",
+				"status=?",
 			).
 			Where(fmt.Sprintf("id = %d", id)).
 			Build()
 
-		_, err := tx.ExecContext(ctx, dml, args...)
+		_, err := tx.ExecContext(ctx, dml, article.Title, article.Content, article.Category, article.Status)
 
 		if err != nil {
 			return err
@@ -105,6 +105,7 @@ func (ar articleRepository) DeleteArticle(ctx context.Context, id int) error {
 			Update("posts").
 			Set(
 				"deleted_at=now()",
+				"status='trash'",
 			).
 			Where(fmt.Sprintf("id = %d", id)).
 			Build()
