@@ -1,0 +1,426 @@
+{
+  "info": {
+    "_postman_id": "0e280b8e-9757-4965-b383-dcbeb1951f16",
+    "name": "SharingVision Backend API",
+    "description": "Simple REST API for articles, built with Go (Gin + MySQL).\n\nBase URL defaults to `http://localhost:3000` (see `PORT` in `.env`). All article bodies share the same validation rules:\n- `title`: required, 20-60 chars\n- `content`: required, 200-800 chars\n- `category`: required, 3-30 chars\n- `status`: required, one of `publish`, `draft`, `trash`",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "articleId",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Articles",
+      "description": "Article CRUD endpoints (`/article`).",
+      "item": [
+        {
+          "name": "Create Article",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/article",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "article"
+              ]
+            },
+            "description": "Create a new article.\n\n- 201: `{\"status\":\"success\",\"message\":\"article created\",\"data\":null}`\n- 400: invalid JSON body or validation failure\n- 500: server error",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Getting Started with Go and Gin Framework\",\n  \"content\": \"Go is a statically typed compiled language designed for simplicity and performance. The Gin framework provides fast routing middleware support and JSON handling for building REST APIs. This article content meets the minimum length validation of two hundred characters required by the API.\",\n  \"category\": \"technology\",\n  \"status\": \"publish\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/article",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "article"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"article created\",\n  \"data\": null\n}"
+            },
+            {
+              "name": "400 Invalid Body",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/article",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "article"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"failed\",\n  \"message\": \"invalid value of CreateArticleInput.Title, expected type: string\",\n  \"data\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "List Articles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/article?offset=0&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "article"
+              ],
+              "query": [
+                {
+                  "key": "offset",
+                  "value": "0",
+                  "description": "Offset, default 0. Values <= 0 fall back to 0."
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Limit, default 10. Values <= 1 fall back to 1."
+                }
+              ]
+            },
+            "description": "Get latest articles (soft-deleted rows excluded, ordered by id DESC).\n\n- 200: `{\"status\":\"success\",\"message\":\"article retrieved\",\"data\":[...]}`\n- 500: server error"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/article?offset=0&limit=10",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "article"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"article retrieved\",\n  \"data\": [\n    {\n      \"id\": 1,\n      \"title\": \"Getting Started with Go and Gin Framework\",\n      \"content\": \"Go is a statically typed compiled language designed for simplicity and performance. The Gin framework provides fast routing middleware support and JSON handling for building REST APIs. This article content meets the minimum length validation of two hundred characters required by the API.\",\n      \"category\": \"technology\",\n      \"status\": \"publish\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Article by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/article/{{articleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "article",
+                "{{articleId}}"
+              ],
+              "variable": [
+                {
+                  "key": "articleId",
+                  "value": "{{articleId}}",
+                  "description": "Article ID (non-numeric values fall back to 0 and return 404)."
+                }
+              ]
+            },
+            "description": "Get a single article by ID.\n\n- 200: `{\"status\":\"success\",\"message\":\"article found\",\"data\":{...}}`\n- 404: `{\"status\":\"failed\",\"message\":\"article not found\",\"data\":null}`\n- 500: server error"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/article/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "article",
+                    "1"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"article found\",\n  \"data\": {\n    \"id\": 1,\n    \"title\": \"Getting Started with Go and Gin Framework\",\n    \"content\": \"Go is a statically typed compiled language designed for simplicity and performance. The Gin framework provides fast routing middleware support and JSON handling for building REST APIs. This article content meets the minimum length validation of two hundred characters required by the API.\",\n    \"category\": \"technology\",\n    \"status\": \"publish\"\n  }\n}"
+            },
+            {
+              "name": "404 Not Found",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/article/999",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "article",
+                    "999"
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"failed\",\n  \"message\": \"article not found\",\n  \"data\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Article",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/article/{{articleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "article",
+                "{{articleId}}"
+              ],
+              "variable": [
+                {
+                  "key": "articleId",
+                  "value": "{{articleId}}"
+                }
+              ]
+            },
+            "description": "Update an article by ID. Same body validation as Create.\n\n- 200: `{\"status\":\"success\",\"message\":\"article updated\",\"data\":null}`\n- 400: invalid JSON body or validation failure\n- 404: article not found\n- 500: server error",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Getting Started with Go and Gin Framework\",\n  \"content\": \"Go is a statically typed compiled language designed for simplicity and performance. The Gin framework provides fast routing middleware support and JSON handling for building REST APIs. This article content meets the minimum length validation of two hundred characters required by the API.\",\n  \"category\": \"technology\",\n  \"status\": \"publish\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/article/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "article",
+                    "1"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"article updated\",\n  \"data\": null\n}"
+            },
+            {
+              "name": "404 Not Found",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/article/999",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "article",
+                    "999"
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"failed\",\n  \"message\": \"article not found\",\n  \"data\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete Article",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/article/{{articleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "article",
+                "{{articleId}}"
+              ],
+              "variable": [
+                {
+                  "key": "articleId",
+                  "value": "{{articleId}}"
+                }
+              ]
+            },
+            "description": "Soft-delete an article by ID (sets `deleted_at=now()` and `status='trash'`).\n\n- 200: `{\"status\":\"success\",\"message\":\"article deleted\",\"data\":null}`\n- 404: article not found\n- 500: server error"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/article/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "article",
+                    "1"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"article deleted\",\n  \"data\": null\n}"
+            },
+            {
+              "name": "404 Not Found",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/article/999",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "article",
+                    "999"
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"failed\",\n  \"message\": \"article not found\",\n  \"data\": null\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
