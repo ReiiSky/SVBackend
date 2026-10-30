@@ -15,8 +15,12 @@ import (
 )
 
 func main() {
-	if err := godotenv.Load("./.env"); err != nil {
-		log.Fatal("error loading .env file")
+	noUseENVFile := os.Getenv("NO_USE_ENV_FILE") == "true"
+
+	if !noUseENVFile {
+		if err := godotenv.Load("./.env"); err != nil {
+			log.Fatal("error loading .env file")
+		}
 	}
 
 	articleRepository := setupArticleRepository()
